@@ -29,7 +29,6 @@
             to { opacity: 1; }
         }
 
-        /* Modernized Logo Style */
         .logo-container h1 {
             font-size: 5vw;
             letter-spacing: 0.5vw;
@@ -41,7 +40,6 @@
             filter: drop-shadow(0 0 15px rgba(20, 40, 160, 0.4));
         }
 
-        /* Time Container */
         .time-display {
             display: flex;
             align-items: baseline;
@@ -59,11 +57,9 @@
             color: var(--samsung-blue);
             margin-left: 1.5vw;
             font-weight: 200;
-            /* Glow effect for seconds */
             text-shadow: 0 0 30px rgba(20, 40, 160, 0.8);
         }
 
-        /* Date Footer */
         #date-display {
             font-size: 2.5vw;
             margin-top: 3vh;
@@ -73,7 +69,32 @@
             font-weight: 400;
         }
 
-        /* Subtle moving background effect */
+        /* FULLSCREEN BUTTON STYLE */
+        #fullscreen-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--text-dim);
+            color: white;
+            cursor: pointer;
+            border-radius: 30px;
+            font-size: 14px;
+            transition: 0.3s;
+            z-index: 100;
+        }
+
+        #fullscreen-btn:hover {
+            background: var(--samsung-blue);
+            border-color: white;
+        }
+
+        /* Hide button when already in fullscreen */
+        :fullscreen #fullscreen-btn {
+            display: none;
+        }
+
         .bg-glow {
             position: absolute;
             width: 100%;
@@ -85,6 +106,9 @@
 </head>
 <body>
     <div class="bg-glow"></div>
+
+    <!-- Fullscreen Toggle Button -->
+    <button id="fullscreen-btn" onclick="toggleFullscreen()">FULLSCREEN</button>
 
     <div class="logo-container">
        <h1>SAMSUNG</h1>
@@ -100,7 +124,6 @@
     <script>
         function updateClock() {
             const now = new Date();
-            
             const h = String(now.getHours()).padStart(2, '0');
             const m = String(now.getMinutes()).padStart(2, '0');
             const s = String(now.getSeconds()).padStart(2, '0');
@@ -110,6 +133,17 @@
 
             const options = { weekday: 'long', month: 'long', day: 'numeric' };
             document.getElementById('date-display').textContent = now.toLocaleDateString('en-US', options);
+        }
+
+        // Fullscreen Logic
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    alert(`Error: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
         }
 
         setInterval(updateClock, 1000);
