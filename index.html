@@ -2,41 +2,40 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Samsung Spain Clock</title>
     <style>
         :root { --samsung-blue: #1428A0; }
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
             color: #fff;
-            margin: 0;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
             width: 100vw;
-            font-family: "Segoe UI", Roboto, Arial, sans-serif;
+            font-family: Arial, sans-serif;
             overflow: hidden;
+            /* Force zoom out for TV browsers that scale too large */
+            zoom: 0.8; 
         }
-        .logo { font-size: 4vmin; letter-spacing: 0.8vmin; margin-bottom: 1vh; font-weight: 800; opacity: 0.9; }
+        .logo { font-size: 40px; letter-spacing: 10px; margin-bottom: 10px; font-weight: 800; opacity: 0.9; }
         .time-display { display: flex; align-items: baseline; font-weight: 700; }
-        #main-time { font-size: 22vmin; letter-spacing: -1vmin; line-height: 1; }
-        #seconds { font-size: 9vmin; color: var(--samsung-blue); margin-left: 1.5vmin; font-weight: 200; }
-        #date-display { font-size: 2.8vmin; margin-top: 2vh; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.4vmin; }
+        #main-time { font-size: 200px; letter-spacing: -5px; line-height: 1; }
+        #seconds { font-size: 80px; color: var(--samsung-blue); margin-left: 20px; font-weight: 200; }
+        #date-display { font-size: 35px; margin-top: 20px; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 5px; }
         
         #fs-btn {
-            position: fixed; bottom: 30px; right: 30px; padding: 12px 24px;
+            position: fixed; bottom: 40px; right: 40px; padding: 15px 30px;
             background: rgba(255,255,255,0.1); border: 1px solid #fff; color: #fff;
-            border-radius: 30px; cursor: pointer; font-size: 1.5vmin; z-index: 100;
+            border-radius: 50px; cursor: pointer; font-size: 18px; z-index: 100;
         }
-        /* Automatically hides if the TV browser accepts the command */
-        :fullscreen #fs-btn, :-webkit-full-screen #fs-btn { display: none; }
     </style>
 </head>
 <body>
-    <button id="fs-btn" onclick="goFull()">FULLSCREEN</button>
+    <button id="fs-btn" onclick="toggleFS()">FULLSCREEN</button>
     <div class="logo">SAMSUNG</div>
     <div class="time-display">
         <span id="main-time">00:00</span>
@@ -47,29 +46,38 @@
     <script>
         function updateClock() {
             const now = new Date();
-            // Force Spain Time calculation (Manual offset)
             const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
             
-            // Check for Daylight Savings in Spain (usually last Sunday of March to last Sunday of Oct)
-            const offset = (new Date().getMonth() > 2 && new Date().getMonth() < 10) ? 2 : 1;
+            // Spain Offset: Mar-Oct is +2, Nov-Feb is +1
+            const month = now.getMonth();
+            const offset = (month > 2 && month < 10) ? 2 : 1;
             const spainDate = new Date(utc + (3600000 * offset));
 
             const h = String(spainDate.getHours()).padStart(2, '0');
             const m = String(spainDate.getMinutes()).padStart(2, '0');
             const s = String(spainDate.getSeconds()).padStart(2, '0');
 
-            document.getElementById('main-time').textContent = `${h}:${m}`;
+            document.getElementById('main-time').textContent = h + ":" + m;
             document.getElementById('seconds').textContent = s;
 
-            // Date in English
-            const options = { weekday: 'long', month: 'long', day: 'numeric' };
-            document.getElementById('date-display').textContent = spainDate.toLocaleDateString('en-US', options);
+            const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+            const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            
+            const dateText = days[spainDate.getDay()] + ", " + months[spainDate.getMonth()] + " " + spainDate.getDate();
+            document.getElementById('date-display').textContent = dateText;
         }
 
-        function goFull() {
-            const el = document.documentElement;
-            const rfs = el.requestFullscreen || el.webkitRequestFullScreen || el.mozRequestFullScreen || el.msRequestFullscreen;
-            if (rfs) rfs.call(el);
+        function toggleFS() {
+            const doc = window.document;
+            const docEl = doc.documentElement;
+            const requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+            const cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+
+            if(!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+                requestFullScreen.call(docEl);
+            } else {
+                cancelFullScreen.call(doc);
+            }
         }
 
         setInterval(updateClock, 1000);
@@ -77,3 +85,4 @@
     </script>
 </body>
 </html>
+
